@@ -1,0 +1,384 @@
+using System;
+using System.Collections.Generic;
+
+namespace TaskInheritance1
+{
+    class Program
+    {
+        public static void Main(String[] args)
+        {
+            
+        }
+    }
+}
+
+
+namespace DataStructures
+{
+    class Person
+    {
+        public string Name;
+        public int Age;
+
+        public Person(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
+    }
+    
+    // Динамический массив
+    class DynamicArray <T>
+    {
+        private const int DEFAULT_COUNT_ELEMENTS = 4;//берем константу=4
+
+        public int Count => _nextIndex;//число элементов равняется следующему индексу
+        private T[] _elements;//создаем массив
+        private int _nextIndex;// создаем индекс на добавление значений
+
+        //конструктор на массив
+        public DynamicArray()
+        {
+            _elements = new T[DEFAULT_COUNT_ELEMENTS];
+        }
+
+        //добавляем элемент
+        public void Add(T value)
+        {
+            if (_nextIndex == _elements.Length)//если длина массива == индексу
+            {
+                Array.Resize(ref _elements, _elements.Length * 2);//то увеличиваем массив
+            }
+            _elements[_nextIndex] = value;//даем значение элементу
+            _nextIndex++;//увеличиваем индекс на 1 что добавить в след раз
+        }
+
+        //возвращаем элемент под искомым индексом
+        public T Get(int index)
+        {
+            return _elements[index];
+        }
+    }  
+    
+    // Циклический массив
+    class CircularArray <T>
+    {
+        public int Count => _nextIndex > _elements.Length ? _elements.Length : _nextIndex;
+        private T[] _elements;
+        private int _nextIndex;
+
+        public CircularArray(int count)
+        {
+            _elements = new T[count];
+        }
+        
+        public void Add(T value)
+        {
+            var currentIndex = _nextIndex % _elements.Length;
+            _elements[_nextIndex] = value;
+            _nextIndex++;
+        }
+
+        public T Get(int index)
+        {
+            if (_nextIndex < _elements.Length)
+            {
+                return _elements[index];
+            }
+            return _elements[(_nextIndex + index) % _elements.Length];
+        }
+    }
+    
+    // Очередь
+    class Queue <T>
+    {
+        //предпологаем что очередь из 4 элементов
+        private const int DEFAULT_COUNT_ELEMENTS = 4;
+        
+        // создаем поля на массив, число элементов, следующий и текущий индекс
+        private int _headIndex;
+        private int _nextIndex;
+        private T[] _elements;
+        private int _count;
+
+        //создаем очередь на 4 эл-та
+        public Queue()
+        {
+            _elements = new T[DEFAULT_COUNT_ELEMENTS];
+        }
+        // добавление в очередь
+        public void Enqueue(T element)
+        {
+            if (_nextIndex - _headIndex >= _elements.Length)
+            {
+                var newArray = new T[_elements.Length * 2];
+                for (int i = 0; i < _elements.Length; i++)
+                {
+                    newArray[i] = _elements[(_headIndex + i) % _elements.Length];
+                }
+                _headIndex = 0;
+                _nextIndex = _elements.Length;
+                _elements = newArray;
+            }
+            
+            var currentIndex = _nextIndex % _elements.Length;
+            _elements[currentIndex] = element;
+            _nextIndex++;
+            _count++;
+        }
+        // удаление из очереди
+        public T Dequeue()
+        {
+            if (_headIndex == _nextIndex)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            var result = _elements[_headIndex % _elements.Length];
+            ++_headIndex;
+            _count--;
+            return result;
+        }
+        // возвращает первый элемент
+        public T Peak()
+        {
+            if (_headIndex == _nextIndex)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            return _elements[_headIndex % _elements.Length];
+        }
+    }
+    
+    // Стэк
+    class Stack
+    {
+        private Person[] _items; // элементы стека
+        public int Count; // количество элементов
+
+        public Stack(int maxSize)
+        {
+            // В конструктор передается максимальное количество элементов 
+            // Которое наш FixedStack способен вместить
+            _items = new Person[maxSize];
+        }
+
+        // добвление элемента
+        public void Push(Person item)
+        {
+            if (Count == _items.Length)
+            {
+                Console.WriteLine("Stack заполнен");
+            }
+            else
+            {
+                _items[Count] = item;
+                Count++;
+            }
+        }
+
+        // возвращаем элемент из верхушки стека с удалением
+        public Person Pop()
+        {
+            if (Count == 0)
+            {
+                Console.WriteLine("Stack пустой");
+                return null;
+            }
+            
+            Count--;
+            var temp = _items[Count]; 
+            _items[Count] = null; 
+            return temp;
+        }
+
+        // возвращаем элемент из верхушки стека без удаления
+        public Person Peek()
+        { 
+            if (Count == 0)
+            {
+                Console.WriteLine("Stack пустой");
+                return null;
+            }
+            
+            return _items[Count - 1];
+        }
+    }
+    
+    // Куча
+    class Heat
+    {
+        //длина кучи
+        public int Count => _heapArray.Count;
+        //создаем динамический массив для кучи
+        private List<int> _heapArray = new ();
+        
+        //добавляем элемент в кучу
+        public void Add(int value)
+        {
+            _heapArray.Add(value);
+            //сортируем снизу вверх
+            ShiftUp(_heapArray.Count - 1);
+        }
+        
+        private void ShiftUp(int index)
+        {
+            //находим индекс родителя
+            int parentIndex = (index - 1) / 2;
+
+            //числа которые надо поменять
+            var currentElement = _heapArray[index];
+            var parentElement = _heapArray[parentIndex];
+            
+            //если потомок больше чем родитель
+            if(currentElement > parentElement)
+            {
+                //то меняем их местами
+                Swap(_heapArray, index, parentIndex);
+                //повторяем
+                ShiftUp(parentIndex);
+            }
+        }
+
+        private void ShiftDown(int index)
+        {
+            //находим левого и правого потомка
+            var leftChildIndex = index * 2 + 1;
+            var rightChildIndex = index * 2 + 2;
+            //предпологаем что левый потомок максимальный
+            var maxChildIndex = leftChildIndex;
+            
+            //если индекс левого потомка больше/равен колличеству элементов
+            //то возвращаемся
+            if (leftChildIndex >= _heapArray.Count)
+            {
+                return;
+            }
+
+            //если индекс правого потомка меньше колличеству элементов и
+            //правый потомок больше максимального, то ставим правого потомка максимальным
+            if (rightChildIndex < _heapArray.Count && 
+                _heapArray[rightChildIndex] > _heapArray[maxChildIndex])
+            {
+                maxChildIndex = rightChildIndex;
+            }
+
+            //если родитель больше максимального потомка, заканчиваем метод
+            if (_heapArray[index] > _heapArray[maxChildIndex])
+            {
+                return;
+            }
+            
+            //меняем местами родителя и максимального потомка
+            Swap(_heapArray, index, maxChildIndex);
+            //повторяем сортировку
+            ShiftDown(maxChildIndex);
+        }
+
+        private void Swap(List<int> array, int index, int parentIndex)
+        {
+            //меняем местами родителя и потомка
+            (array[index], array[parentIndex]) = (array[parentIndex], array[index]);
+        }
+
+        //извлекаем максимум
+        public int ExtractMaximum()
+        {
+            //берем максимум
+            var result = _heapArray[0];
+            //равняем максимум последнему числу в массиве
+            _heapArray[0] = _heapArray[_heapArray[^1]];
+            //сортируем сверху вниз
+            ShiftDown(0);
+            
+            //возвращаем максимум который удалили
+            return result;
+        }
+    }
+    
+    // Двусвязный список
+    class Node
+    {
+        //создаем ссылки на следующий и прошлый элементы и значение элемента
+        //
+        public Node Tail;
+        public Node Head;
+        public Node Next;
+        public Person Value;
+
+        //создаем конструктор на значение элемента
+        public Node(Person value)
+        {
+            Value = value;
+        }
+
+        //добавляем в конец списка
+        public void AddLast(Person value)
+        {
+            var node = new Node(value);//создаем ноду
+            if (Tail == null)//если хвост пустой
+            {
+                Tail = node;// то хвост и голова раняется ноде
+                Head = node;
+            }
+            else//если нет
+            {
+                Tail.Next = node;//то хвост.некст и хвост равняем ноде
+                Tail = node;
+            }
+        }
+        
+        //добавляем в начало списка
+        public void AddFirst(Person value)
+        {
+            var node = new Node(value);//создаем ноду
+            if (Head == null)//если голова пустая
+            {
+                Tail = node;// то хвост и голова раняется ноде
+                Head = node;
+            }
+            else//если нет
+            {
+                node.Next = Head;//то нода.некст = голове и голова равняется ноде
+                Head = node;
+            }
+        }
+
+        //поиск ноды для удаления
+        public void Remove(Person value)
+        {
+            Node previousNode = null;//создаем ноду=нал
+            var currentNode = Head;//и ноду равняющейся голове
+            
+            while (currentNode != null)
+            {
+                if (currentNode.Value.Name == value.Name &&
+                    currentNode.Value.Age == value.Age)//если голова равняется ноде которую надо удалить
+                {
+                    RemoveNode(currentNode, previousNode);//удаляем ее
+                }
+
+                previousNode = currentNode;//предыдущая нода равна ноде которую запускаем в цикл
+                currentNode = currentNode.Next;//нода которая была в цикле равняется следующе ноде
+            }
+        }
+
+        //удаление ноды
+        private void RemoveNode( Node removingNode, Node previousNode)
+        {
+            if (removingNode == Head)//если удаляемая нода равняется голове
+            {
+                Head = removingNode.Next;//голову равняем следующей ноде
+            }
+            
+            if (removingNode == Tail)//если удаляемая нода равняется хвосту
+            {
+                Tail = previousNode;//хвост равняем предыдущей ноде
+            }
+
+            if (previousNode != null)//если предыдущая нода не равна нал
+            {
+                previousNode.Next = removingNode.Next;// то предыдущаянода.некст равна нал
+            }
+        }
+    }
+}
